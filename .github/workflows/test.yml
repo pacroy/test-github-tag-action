@@ -1,0 +1,12 @@
+name: 'Test github-tag-action'
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: 'Custom tag'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout self'
+        uses: actions/checkout@v3
