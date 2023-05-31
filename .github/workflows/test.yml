@@ -3,6 +3,9 @@ name: 'Test github-tag-action'
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   test:
     name: 'Custom tag'
