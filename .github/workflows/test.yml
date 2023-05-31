@@ -10,3 +10,40 @@ jobs:
     steps:
       - name: 'Checkout self'
         uses: actions/checkout@v3
+      - name: "Bump/tag version"
+        id: github_tag
+        uses: anothrNick/github-tag-action@1.66.0
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CUSTOM_TAG: 'vA.B.C'
+          WITH_V: 'true'
+          RELEASE_BRANCHES: 'main'
+          DEFAULT_BUMP: 'patch'
+          INITIAL_VERSION: '0.1.0'
+          DRY_RUN: 'false'
+      - name: "Display outputs"
+        shell: bash
+        run: |
+          echo "new_tag: ${{ steps.github_tag.outputs.new_tag }}"
+          echo "tag    : ${{ steps.github_tag.outputs.tag }}"
+          echo "part   : ${{ steps.github_tag.outputs.part }}"
+      - name: Cleanup
+        uses: actions/github-script@v6
+        if: always()
+        env:
+          TAG: ${{ steps.github_tag.outputs.new_tag }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { TAG } = process.env
+
+            async function deleteTag(tag) {
+              console.log(`Deleting tag "${tag}" ...`)
+              try {
+                await github.rest.git.deleteRef({owner: context.repo.owner, repo: context.repo.repo, ref: "tags/".concat(tag)})
+              } catch (err) {
+                console.log(`${err.name}: ${err.message}`)
+              }
+            }
+
+            await deleteTag(TAG)
